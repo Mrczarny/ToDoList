@@ -5,9 +5,11 @@ namespace ToDoList.Models
 {
     public class ToDoModel
     {
-        public ToDoModel()
+        public ToDoModel(ToDoDto m)
         {
-            
+            Name = m.Name;
+            Description = m.Description;
+            Date = m.Date;
         }
 
         [Required]

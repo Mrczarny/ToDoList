@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ToDoList.DataAccess;
 
 namespace ToDoList
 {
@@ -24,6 +26,8 @@ namespace ToDoList
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
+            services.AddDbContext<ToDoContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("mssql")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,6 +42,14 @@ namespace ToDoList
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+            }
+
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                var context = services.GetRequiredService<ToDoContext>();
+                context.Database.EnsureCreated();
             }
 
             app.UseHttpsRedirection();

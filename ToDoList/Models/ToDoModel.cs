@@ -21,6 +21,6 @@ namespace ToDoList.Models
         public string Description { get; set; }
 
         [Required]
-        public DateTime Day { get; set; }
+        public DateTime Date { get; set; }
     }
 }

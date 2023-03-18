@@ -29,6 +29,7 @@ namespace ToDoList
             services.AddDbContext<ToDoContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("mssql")));
             services.AddHttpClient("dev", options => options.BaseAddress = new Uri("https://localhost:5001/"));
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,6 +63,7 @@ namespace ToDoList
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
         }

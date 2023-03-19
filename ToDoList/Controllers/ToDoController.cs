@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using ToDoList.DataAccess;
 using ToDoList.Models;
 
@@ -30,6 +31,7 @@ namespace ToDoList.Controllers
                 {
                     todos.Add(new ToDoDto(todo));
                 }
+                return todos;
             }
             catch (Exception e)
             {

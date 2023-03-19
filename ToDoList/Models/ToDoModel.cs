@@ -5,11 +5,15 @@ namespace ToDoList.Models
 {
     public class ToDoModel
     {
+        public ToDoModel()
+        {
+            
+        }
         public ToDoModel(ToDoDto m)
         {
             Name = m.Name;
             Description = m.Description;
-            Date = m.Date;
+            if (m.Date != null) Date = (DateTime) m.Date;
         }
 
         [Required]

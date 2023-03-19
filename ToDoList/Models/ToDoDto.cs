@@ -4,6 +4,10 @@ namespace ToDoList.Models
 {
     public class ToDoDto
     {
+        public ToDoDto()
+        {
+            
+        }
         public ToDoDto(string name, string description, DateTime date)
         {
             this.Guid = Guid.NewGuid();
@@ -19,10 +23,7 @@ namespace ToDoList.Models
             Description = m.Description;
         }
 
-        public Guid Guid {
-            get => this.Guid;
-            set => Guid.NewGuid();
-        } 
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; }
 

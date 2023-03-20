@@ -8,7 +8,7 @@
 <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 <div class="text-center">
     <h3 align="left">@(Model.SelectedWeek.ToString("MMM")[0].ToString().ToUpper() + Model.SelectedWeek.ToString("MMM").Substring(1)). @(Model.SelectedWeek.Year)</h3>
-    <div class="row flex-nowrap">
+    <div class="row flex-nowrap flex-row overflow-auto">
         <form asp-page-handler="prevWeek" method="post">
             <button type="submit" class="btn btn-outline-secondary rounded" style="height: fit-content">
                 <span class="material-icons">

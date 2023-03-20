@@ -72,7 +72,7 @@ namespace ToDoList.Pages
         }
 
 
-        public async Task<IActionResult> OnPostNextWeekAsync()
+        public IActionResult OnPostNextWeekAsync()
         {
             try
             {
@@ -82,11 +82,11 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return Page();
+                return RedirectToPage();
             }
         }
 
-        public async Task<IActionResult> OnPostPrevWeekAsync()
+        public IActionResult OnPostPrevWeekAsync()
         {
             try
             {
@@ -96,7 +96,7 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return Page();
+                return RedirectToPage();
             }
         }
 
@@ -121,8 +121,8 @@ namespace ToDoList.Pages
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(e, e.Message);
+                return RedirectToPage();
             }
         }
 
@@ -152,8 +152,8 @@ namespace ToDoList.Pages
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(e, e.Message);
+                return RedirectToPage();
             }
         }
 
@@ -169,22 +169,27 @@ namespace ToDoList.Pages
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(e, e.Message);
+                return RedirectToPage();
             }
         }
 
-        public async Task<IActionResult> OnPostSelectToDo()
+        public IActionResult OnPostSelectToDo()
         {
 
             ToDos =  JsonConvert.DeserializeObject<List<List<ToDoDto>>>(ToDosJson);
-            foreach (var todoList in ToDos)
+            if (ToDos != null)
             {
-                 if (todoList.Exists(x => x.ToDoGuid.ToString() == SelectedGuid)) SelectedToDo = todoList.Find(x => x.ToDoGuid.ToString() == SelectedGuid);
+                foreach (var todoList in ToDos)
+                {
+                    if (todoList.Exists(x => x.ToDoGuid.ToString() == SelectedGuid)) SelectedToDo = todoList.Find(x => x.ToDoGuid.ToString() == SelectedGuid);
+                }
+                SelectedToDo.Date = DateTime.Parse(SelectedToDo.Date.ToString("g"));
+                TempData.Keep();
+                return Page(); 
             }
-            SelectedToDo.Date = DateTime.Parse(SelectedToDo.Date.ToString("g")); 
-            TempData.Keep();
-            return Page();
+
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -207,7 +212,7 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return Page();
+                return RedirectToPage();
             }
 
         }

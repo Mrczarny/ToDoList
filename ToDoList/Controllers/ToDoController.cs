@@ -72,7 +72,7 @@ namespace ToDoList.Controllers
         {
             try
             {
-                var entry = _context.Find<ToDoModel>(BitConverter.ToInt64(HttpContext.Session.Get(model.Guid.ToString())));
+                var entry = _context.Find<ToDoModel>(BitConverter.ToInt64(HttpContext.Session.Get(model.ToDoGuid.ToString())));
                 if (entry != null)
                 {
                     entry.Date = model.Date;

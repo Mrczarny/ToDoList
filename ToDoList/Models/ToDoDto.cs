@@ -28,6 +28,7 @@ namespace ToDoList.Models
         public Guid ToDoGuid { get; set; }
 
         [Required]
+        [MaxLength(75)]
         public string Name { get; set; }
 
         public string Description { get; set; }

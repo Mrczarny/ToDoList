@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using ToDoList.Models;
@@ -31,6 +33,7 @@ namespace ToDoList.Pages
 
         public List<List<ToDoDto>> ToDos { get; set; }
 
+        
         [BindProperty]
         public ToDoDto? SelectedToDo { get; set; }
 
@@ -38,8 +41,9 @@ namespace ToDoList.Pages
         //public string SelectedWeekString { get; set; }
 
         [TempData]
-        public DateTime SelectedWeek { get; set; } 
+        public DateTime SelectedWeek { get; set; }
 
+        [ValidateNever]
         [BindProperty]
         public DayOfWeek SelectedDay { get; set; }
 
@@ -106,10 +110,41 @@ namespace ToDoList.Pages
                     if (SelectedWeek == default) SelectedWeek = DateTime.Now - TimeSpan.FromDays((int)DateTime.Now.DayOfWeek);
                     SelectedToDo = (from todoList in ToDos
                         from toDo in todoList
-                        where toDo.Guid == Guid.Parse(SelectedGuid)
+                        where toDo.ToDoGuid == Guid.Parse(SelectedGuid)
                         select toDo).First();
                     SelectedToDo.Date = new DateTime(SelectedWeek.Year, SelectedWeek.Month, SelectedWeek.Day + (int)SelectedDay, SelectedToDo.Date.Hour,
                         SelectedToDo.Date.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
+                    await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
+                }
+                return RedirectToPage(SelectedWeek);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public async Task<IActionResult> OnPostEditAsync()
+        {
+            try
+            {
+                ToDos = JsonConvert.DeserializeObject<List<List<ToDoDto>>>(ToDosJson);
+                if (ToDos != null)
+                {
+                    TryValidateModel(SelectedToDo);
+                    if (ModelState.GetValidationState(nameof(SelectedToDo.Name)) == ModelValidationState.Invalid || ModelState.GetValidationState(nameof(SelectedToDo.Date)) == ModelValidationState.Invalid)
+                    {
+                        return RedirectToPage(SelectedWeek);
+                    }
+                    var oldToDo = (from todoList in ToDos
+                        from toDo in todoList
+                        where toDo.ToDoGuid == SelectedToDo.ToDoGuid
+                        select toDo).First();
+                    oldToDo.Date = oldToDo.Date.Subtract(new TimeSpan(oldToDo.Date.Hour, oldToDo.Date.Minute, 0));
+                    oldToDo.Date = oldToDo.Date.Add(new TimeSpan(SelectedToDo.Date.Hour, SelectedToDo.Date.Minute, 0));
+                    SelectedToDo.Date = oldToDo.Date;
                     await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
                 }
                 return RedirectToPage(SelectedWeek);
@@ -126,8 +161,11 @@ namespace ToDoList.Pages
         {
             try
             {
-                await _httpClient.DeleteAsync($"/api/ToDo/delete/{SelectedToDo.Guid}");
-                return RedirectToPage();
+                if (SelectedToDo != default)
+                {
+                    await _httpClient.DeleteAsync($"/api/ToDo/{SelectedToDo.ToDoGuid}");
+                }
+                return RedirectToPage(SelectedWeek);
             }
             catch (Exception e)
             {
@@ -142,9 +180,9 @@ namespace ToDoList.Pages
             ToDos =  JsonConvert.DeserializeObject<List<List<ToDoDto>>>(ToDosJson);
             foreach (var todoList in ToDos)
             {
-                 if (todoList.Exists(x => x.Guid.ToString() == SelectedGuid)) SelectedToDo = todoList.Find(x => x.Guid.ToString() == SelectedGuid);
+                 if (todoList.Exists(x => x.ToDoGuid.ToString() == SelectedGuid)) SelectedToDo = todoList.Find(x => x.ToDoGuid.ToString() == SelectedGuid);
             }
-            
+            SelectedToDo.Date = DateTime.Parse(SelectedToDo.Date.ToString("g")); 
             TempData.Keep();
             return Page();
         }
@@ -153,10 +191,16 @@ namespace ToDoList.Pages
         {
             try
             {
+                TryValidateModel(SelectedToDo);
+                if (ModelState.GetValidationState(nameof(SelectedToDo)) == ModelValidationState.Invalid || ModelState.GetValidationState(nameof(SelectedToDo.Date)) == ModelValidationState.Invalid)
+                {
+                    RedirectToPage();
+                }
                 if (SelectedWeek == default) SelectedWeek = DateTime.Now - TimeSpan.FromDays((int)DateTime.Now.DayOfWeek);
                 var selectedDate = SelectedWeek.AddDays((int) SelectedDay);
                 SelectedToDo.Date = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, SelectedToDo.Date.Hour,
                     SelectedToDo.Date.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
+
                 await _httpClient.PostAsJsonAsync($"/api/ToDo/", SelectedToDo);
                 return RedirectToPage(SelectedWeek);
             }

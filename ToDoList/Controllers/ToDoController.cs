@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using ToDoList.DataAccess;
 using ToDoList.Models;
+using System.Net.Http;
 
 namespace ToDoList.Controllers
 {
@@ -47,9 +48,10 @@ namespace ToDoList.Controllers
             try
             {
                 date = date.Subtract(TimeSpan.FromDays((int) date.DayOfWeek)).Date;
+                var lastDayOfWeek = date.AddDays(7);
                 var todos = new List<ToDoDto>();
-                var monthsTodo = _context.ToDoSet.Where(x => x.Date.Year == date.Year && x.Date.Month == date.Month).AsEnumerable();
-                foreach (var todo in monthsTodo.Where(x => x.Date.Subtract(date) > TimeSpan.Zero && x.Date.Subtract(date) < TimeSpan.FromDays(7) ))
+                var weekTodo = _context.ToDoSet.Where(x => x.Date >= date && x.Date <= lastDayOfWeek).AsEnumerable();
+                foreach (var todo in weekTodo)
                 {
                     var dto = new ToDoDto(todo);
                     HttpContext.Session.Set(dto.Guid.ToString(), BitConverter.GetBytes(todo.Id));
@@ -59,8 +61,8 @@ namespace ToDoList.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(e, e.Message);
+                return Problem();
             }
         }
 

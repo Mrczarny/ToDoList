@@ -75,12 +75,56 @@
             </div>
         </div>
     </div>
+    
+
+    <div class="modal fade" id="ToDoEditModal" tabindex="-1" role="dialog" aria-labelledby="ToDoModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalCenterTitle">Edit ToDo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="EditToDo" asp-page-handler="edit" method="post">
+                        <div class="form-group">
+                            <label for="todoEditTitle">ToDo's Title</label>
+                            <input type="text" asp-for="SelectedToDo.Name" class="form-control" id="todoEditTitle" aria-describedby="toDoNameHelp" placeholder="Enter Title">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="todoEditDescription">ToDo's Description</label>
+                            <textarea asp-for="SelectedToDo.Description" class="form-control" id="todoEditDescription" rows="3" placeholder="Enter Description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="todoEditDate">ToDo's hour</label>
+                            <input type="time" asp-for="SelectedToDo.Date" class="form-control" id="todoEditDate" aria-describedby="toDoDateHelp" placeholder="Enter hour">
+
+                        </div>
+                        <input id="dayInput" type="number" min="0" max="6" asp-for="SelectedDay" hidden="true" aria-hidden="True" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="EditToDoSubmit" form="EditToDo" class="btn btn-primary">Save ToDo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
 
     <form asp-page-handler="changeDay" method="post">
         <input hidden="true" id="changeToDayInput" type="number" asp-for="@Model.SelectedDay"/>
         <input hidden="true" id="toDoGuidInput" type="text" asp-for="@Model.SelectedGuid"/>
-        <button id="dayChangeSubmit" hidden="true"></button>
+
+    </form>
+    
+    <form asp-page-handler="selectToDo" method="post">
+        <input hidden="true" id="selectToDoGuidInput" type="text" asp-for="@Model.SelectedGuid"/>
+        <button id="selectToDoSubmit" hidden="true">
+        </button>
     </form>
 
 
@@ -91,6 +135,7 @@
                 (e) => {
                     $("#ToDoModal").modal();
                     clickedDay = day.id.split('-')[0];
+
                     document.querySelector('#dayInput').value = parseInt(clickedDay);
                 });
         });
@@ -120,8 +165,21 @@
                     document.querySelector('#dayChangeSubmit').form.submit();
                 });
         });
-
+        
+        toDos.forEach(todo => {
+            todo.addEventListener('click', () =>{
+             document.querySelector('#selectToDoGuidInput').value = todo.id
+                document.querySelector('#selectToDoSubmit').form.submit();
+            })
+        })
     </script>
 
-
+    @if (Model.SelectedToDo != default)
+    {
+        <script>
+            $(document).ready(function () {
+                $("#ToDoEditModal").modal() 
+            });
+        </script>
+    }
 </div>

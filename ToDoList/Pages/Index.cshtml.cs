@@ -136,6 +136,19 @@ namespace ToDoList.Pages
             }
         }
 
+        public async Task<IActionResult> OnPostSelectToDo()
+        {
+
+            ToDos =  JsonConvert.DeserializeObject<List<List<ToDoDto>>>(ToDosJson);
+            foreach (var todoList in ToDos)
+            {
+                 if (todoList.Exists(x => x.Guid.ToString() == SelectedGuid)) SelectedToDo = todoList.Find(x => x.Guid.ToString() == SelectedGuid);
+            }
+            
+            TempData.Keep();
+            return Page();
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             try

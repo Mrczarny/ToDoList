@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,8 +29,19 @@ namespace ToDoList
         {
             services.AddRazorPages();
             services.AddDbContext<ToDoContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("mssql")));
-            services.AddHttpClient("dev", options => options.BaseAddress = new Uri("https://localhost:5001/"));
+            {
+                if (Configuration.GetConnectionString("mssql") != null)
+                {
+                    options.UseSqlServer(Configuration.GetConnectionString("mssql"));
+                }
+                else
+                {
+                    var folder = Environment.SpecialFolder.LocalApplicationData;
+                    var path = Environment.GetFolderPath(folder);
+                    options.UseSqlite($"Data Source={System.IO.Path.Join(path, "ToDos.db")}");
+                }
+            });
+            services.AddHttpClient("baseHttp", options => options.BaseAddress = new Uri("https://localhost:5001"));
             services.AddControllers();
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
@@ -60,7 +72,6 @@ namespace ToDoList
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var services = scope.ServiceProvider;
-
                 var context = services.GetRequiredService<ToDoContext>();
                 context.Database.EnsureCreated();
             }

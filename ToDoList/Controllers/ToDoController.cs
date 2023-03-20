@@ -90,7 +90,27 @@ namespace ToDoList.Controllers
             }
         }
 
+        [HttpDelete("{uid:guid}")]
+        public ActionResult DeleteToDo(Guid uid)
+        {
+            try
+            {
+                var entry = _context.Find<ToDoModel>(BitConverter.ToInt64(HttpContext.Session.Get(uid.ToString())));
+                if (entry != null)
+                {
+                    _context.ToDoSet.Remove(entry);
+                    _context.SaveChanges();
+                    return Ok();
+                }
 
+                return NotFound("ToDo not found");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, e.Message);
+                return Problem();
+            }
+        }
 
 
         [HttpPost]

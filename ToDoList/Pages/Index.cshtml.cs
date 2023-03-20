@@ -25,7 +25,7 @@ namespace ToDoList.Pages
         public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory client)
         {
             _logger = logger;
-            _httpClient = client.CreateClient("dev");
+            _httpClient = client.CreateClient("baseHttp");
         }
 
         [TempData]

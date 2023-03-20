@@ -54,7 +54,7 @@ namespace ToDoList.Controllers
                 foreach (var todo in weekTodo)
                 {
                     var dto = new ToDoDto(todo);
-                    HttpContext.Session.Set(dto.Guid.ToString(), BitConverter.GetBytes(todo.Id));
+                    HttpContext.Session.Set(dto.ToDoGuid.ToString(), BitConverter.GetBytes(todo.Id));
                     todos.Add(dto);
                 }
                 return todos;

@@ -80,6 +80,7 @@ namespace ToDoList.Controllers
                     entry.Description = model.Description;
                     _context.ToDoSet.Update(entry);
                     _context.SaveChanges();
+                    return Ok();
                 }
                 return NotFound("ToDo not found");
             }

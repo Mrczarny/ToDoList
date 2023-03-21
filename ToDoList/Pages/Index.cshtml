@@ -4,7 +4,200 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link type="text/css" rel="stylesheet"  href="~/css/ToDo.css"/>
+<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+<div class="text-center" style="width: 90%; margin: 0 auto; height: 100%; display: flex; flex-flow: column">
+    <h3 class="display-6" align="left">@(Model.SelectedWeek.ToString("MMM")[0].ToString().ToUpper() + Model.SelectedWeek.ToString("MMM").Substring(1)). @(Model.SelectedWeek.Year)</h3>
+    
+    <div class="row flex-nowrap" style="flex: 1 1 auto">
+        <div class="col-1 d-flex align-items-center">
+            <form asp-page-handler="prevWeek" class="align-middle" method="post">
+                <button type="submit" class="btn btn-outline-secondary align-items-center rounded-pill">
+                    <span class="material-icons text-center align-middle">arrow_back_ios</span>
+                </button>
+            </form>
+        </div>
+        <div class="col-10">
+            <div class="row flex-nowrap overflow-auto">
+
+                @foreach (var dayTodos in Model.ToDos)
+                {
+                    <div id="@(Model.ToDos.IndexOf(dayTodos))-dayToDo" class="col dayToDo" style="width: 14.3%; display: block" >
+                        <h3 class="d-none d-xxl-block " draggable="false">@((DayOfWeek) Model.ToDos.IndexOf(dayTodos))</h3>
+                        <h3 class="d-none d-xl-block d-xxl-none" draggable="false">@(((DayOfWeek)Model.ToDos.IndexOf(dayTodos)).ToString()[..3])</h3>
+                        <h3 class="d-xl-none" draggable="false">@(((DayOfWeek)Model.ToDos.IndexOf(dayTodos)).ToString()[0])</h3>
+                        <h5 draggable="false">@(Model.SelectedWeek.AddDays(Model.ToDos.IndexOf(dayTodos)).Day)</h5>
+                        <ul id="dayToDoUl" class="todoUl list-group list-group-flush ">
+                            @foreach (var todo in dayTodos)
+                            {
+                                <li id="@todo.ToDoGuid" class="list-group-item todo overflow-hidden" draggable="true">
+                                    @(todo.Name?.Length > 15 ? todo.Name[..14]+".." : todo.Name)
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-1 d-flex align-items-center">
+            <form asp-page-handler="nextWeek" method="post">
+                <button type="submit" class="btn btn-outline-secondary align-items-center rounded-pill">
+                    <span class="material-icons align-middle">arrow_forward_ios</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    
+    
+
+    <div class="modal fade" id="ToDoModal" tabindex="-1" role="dialog" aria-labelledby="ToDoModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Add ToDo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span hidden="true" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="AddToDo" asp-page-handler="" method="post">
+                        <div class="form-group">
+                            <label for="todoTitle" class="form-label">ToDo's Title</label>
+                            <input type="text" asp-for="SelectedToDo.Name" class="form-control" id="todoTitle" aria-describedby="toDoNameHelp" placeholder="Enter Title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="todoDescription" class="form-label">ToDo's Description</label>
+                            <textarea asp-for="SelectedToDo.Description" class="form-control" id="todoDescription" rows="3" placeholder="Enter Description" ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="todoDate" class="form-label">ToDo's hour</label>
+                            <input type="time" asp-for="SelectedToDo.Date" step="60" class="form-control" id="todoDate" aria-describedby="toDoDateHelp" placeholder="Enter hour" required>
+
+                        </div>
+                        <input id="dayInput" type="number" min="0" max="6" asp-for="SelectedDay" hidden="true" aria-hidden="True"/>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" id="AddToDoSubmit" form="AddToDo" class="btn btn-primary">Add ToDo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="modal fade" id="ToDoEditModal" tabindex="-1" role="dialog" aria-labelledby="ToDoModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalCenterTitle">Edit ToDo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span hidden="true" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="EditToDo" asp-page-handler="edit" method="post">
+                        <div class="form-group">
+                            <label for="todoEditTitle" class="form-label">ToDo's Title</label>
+                            <input type="text" asp-for="SelectedToDo.Name" class="form-control" id="todoEditTitle" aria-describedby="toDoNameHelp" placeholder="Enter Title" required>
+
+                        </div>
+                        <div class="form-group">
+                            <label for="todoEditDescription" class="form-label">ToDo's Description</label>
+                            <textarea asp-for="SelectedToDo.Description" class="form-control" id="todoEditDescription" rows="3" placeholder="Enter Description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="todoEditDate" class="form-label">ToDo's hour</label>
+                            <input type="time" asp-for="SelectedToDo.Date" step="60" class="form-control" id="todoEditDate" aria-describedby="toDoDateHelp" placeholder="Enter hour" required>
+
+                        </div>
+                        <input id="dayInput" type="number" min="0" max="6" asp-for="SelectedDay" hidden="true" aria-hidden="True" />
+                        <input id="ToDoGuidEditInput" type="text" asp-for="SelectedToDo.ToDoGuid" hidden="true" value="@Model.SelectedGuid" aria-hidden="True" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <form asp-page-handler="delete" method="post">
+                        <div class="align-items-start align-self-start">
+                            <button type="submit" class="btn btn-danger " id="deleteToDo">Delete ToDo</button>
+                        </div>
+                        <input id="ToDoGuidDeleteInput" type="text" asp-for="SelectedToDo.ToDoGuid" hidden="true" value="@Model.SelectedGuid" aria-hidden="True"/>
+                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" id="EditToDoSubmit" form="EditToDo" class="btn btn-primary">Save ToDo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+
+    <form asp-page-handler="changeDay" method="post">
+        <input hidden="true" id="changeToDayInput" type="number" asp-for="@Model.SelectedDay"/>
+        <input hidden="true" id="toDoGuidInput" type="text" asp-for="@Model.SelectedGuid"/>
+        <button id="dayChangeSubmit" hidden="true"></button>
+    </form>
+    
+    <form asp-page-handler="selectToDo" method="post">
+        <input hidden="true" id="selectToDoGuidInput" type="text" asp-for="@Model.SelectedGuid"/>
+        <button id="selectToDoSubmit" hidden="true">
+        </button>
+    </form>
+
+
+    <script>
+        var clickedDay = null;
+        document.querySelectorAll('.dayToDo').forEach(day => {
+            day.addEventListener('dblclick',
+                (e) => {
+                    $('#AddToDo').find("[name*='SelectedToDo.']").val("");
+                    $("#ToDoModal").modal('show');
+                    clickedDay = day.id.split('-')[0];
+
+                    document.querySelector('#dayInput').value = parseInt(clickedDay);
+                });
+        });
+
+
+        var dayToDos = document.querySelectorAll('.dayToDo');
+        var toDos = document.querySelectorAll('.todo');
+        var dragged = null;
+        document.querySelectorAll('.todo').forEach(todo => {
+            todo.addEventListener('drag',
+                () => {
+                    dragged = todo;
+                });
+        });
+        dayToDos.forEach(day => {
+            day.addEventListener('dragover',
+                (e) => {
+                    e.preventDefault();
+                });
+            day.addEventListener('drop',
+                (e) => {
+                    e.preventDefault();
+                    dragged.parentNode.removeChild(dragged);
+                    day.querySelector('#dayToDoUl').appendChild(dragged);
+                    document.querySelector('#toDoGuidInput').value = dragged.id;
+                    document.querySelector('#changeToDayInput').value = parseInt(day.id.split('-')[0]);
+                    document.querySelector('#dayChangeSubmit').form.submit();
+                });
+        });
+        
+        toDos.forEach(todo => {
+            todo.addEventListener('click', () => {
+                document.querySelector('#selectToDoGuidInput').value = todo.id;
+                document.querySelector('#selectToDoSubmit').form.submit();
+            })
+        })
+    </script>
+
+    @if (Model.SelectedToDo != default)
+    {
+        <script>
+            $(document).ready(function () {
+                $("#ToDoEditModal").modal('show');
+            });
+        </script>
+    }
 </div>

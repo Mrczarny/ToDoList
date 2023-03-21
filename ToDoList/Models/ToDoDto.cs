@@ -31,6 +31,7 @@ namespace ToDoList.Models
         [MaxLength(75)]
         public string Name { get; set; }
 
+        [MaxLength(1999)]
         public string Description { get; set; }
 
         [Required]

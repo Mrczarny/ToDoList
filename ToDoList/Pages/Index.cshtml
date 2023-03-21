@@ -6,10 +6,10 @@
 
 <link type="text/css" rel="stylesheet"  href="~/css/ToDo.css"/>
 <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-<div class="text-center" style="width: 90%; margin: 0 auto">
+<div class="text-center" style="width: 90%; margin: 0 auto; height: 100%; display: flex; flex-flow: column">
     <h3 class="display-6" align="left">@(Model.SelectedWeek.ToString("MMM")[0].ToString().ToUpper() + Model.SelectedWeek.ToString("MMM").Substring(1)). @(Model.SelectedWeek.Year)</h3>
     
-    <div class="row flex-nowrap">
+    <div class="row flex-nowrap" style="flex: 1 1 auto">
         <div class="col-1 d-flex align-items-center">
             <form asp-page-handler="prevWeek" class="align-middle" method="post">
                 <button type="submit" class="btn btn-outline-secondary align-items-center rounded-pill">

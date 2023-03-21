@@ -1,4 +1,7 @@
-﻿.todoUl {
+﻿body {
+    height: 100%
+}
+.todoUl {
     list-style: none;
     padding-left: 0;
 }

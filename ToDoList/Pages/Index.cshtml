@@ -10,12 +10,10 @@
     <h3 class="display-6" align="left">@(Model.SelectedWeek.ToString("MMM")[0].ToString().ToUpper() + Model.SelectedWeek.ToString("MMM").Substring(1)). @(Model.SelectedWeek.Year)</h3>
     
     <div class="row flex-nowrap">
-        <div class="col-1">
-            <form asp-page-handler="prevWeek" method="post">
-                <button type="submit" class="btn btn-outline-secondary rounded" style="height: fit-content">
-                    <span class="material-icons">
-                        arrow_back_ios
-                    </span>
+        <div class="col-1 d-flex align-items-center">
+            <form asp-page-handler="prevWeek" class="align-middle" method="post">
+                <button type="submit" class="btn btn-outline-secondary align-items-center rounded-pill">
+                    <span class="material-icons text-center align-middle">arrow_back_ios</span>
                 </button>
             </form>
         </div>
@@ -29,7 +27,7 @@
                         <h3 class="d-none d-xl-block d-xxl-none" draggable="false">@(((DayOfWeek)Model.ToDos.IndexOf(dayTodos)).ToString()[..3])</h3>
                         <h3 class="d-xl-none" draggable="false">@(((DayOfWeek)Model.ToDos.IndexOf(dayTodos)).ToString()[0])</h3>
                         <h5 draggable="false">@(Model.SelectedWeek.AddDays(Model.ToDos.IndexOf(dayTodos)).Day)</h5>
-                        <ul id="dayToDoUl" class="list-group list-group-flush">
+                        <ul id="dayToDoUl" class="todoUl list-group list-group-flush ">
                             @foreach (var todo in dayTodos)
                             {
                                 <li id="@todo.ToDoGuid" class="list-group-item todo overflow-hidden" draggable="true">
@@ -41,12 +39,10 @@
                 }
             </div>
         </div>
-        <div class="col-1">
+        <div class="col-1 d-flex align-items-center">
             <form asp-page-handler="nextWeek" method="post">
-                <button type="submit" class="btn btn-outline-secondary rounded" style="height: fit-content">
-                    <span class="material-icons">
-                        arrow_forward_ios
-                    </span>
+                <button type="submit" class="btn btn-outline-secondary align-items-center rounded-pill">
+                    <span class="material-icons align-middle">arrow_forward_ios</span>
                 </button>
             </form>
         </div>

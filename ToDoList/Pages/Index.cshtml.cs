@@ -112,7 +112,8 @@ namespace ToDoList.Pages
                         from toDo in todoList
                         where toDo.ToDoGuid == Guid.Parse(SelectedGuid)
                         select toDo).First();
-                    SelectedToDo.Date = new DateTime(SelectedWeek.Year, SelectedWeek.Month, SelectedWeek.Day + (int)SelectedDay, SelectedToDo.Date.Hour,
+                    var newDate = SelectedWeek.AddDays((int) SelectedDay);
+                    SelectedToDo.Date = new DateTime(newDate.Year, newDate.Month, newDate.Day , SelectedToDo.Date.Hour,
                         SelectedToDo.Date.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
                     await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
                 }

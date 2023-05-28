@@ -4,6 +4,8 @@
     ViewData["Title"] = "Home page";
 }
 
+
+
 <link type="text/css" rel="stylesheet"  href="~/css/ToDo.css"/>
 <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 <div class="text-center" style="width: 90%; margin: 0 auto; height: 100%; display: flex; flex-flow: column">
@@ -17,12 +19,12 @@
                 </button>
             </form>
         </div>
-        <div class="col-10">
-            <div class="row flex-nowrap overflow-auto">
+        <div class="col-10" >
+            <div class="row flex-nowrap overflow-auto" style="height: 100%">
 
                 @foreach (var dayTodos in Model.ToDos)
                 {
-                    <div id="@(Model.ToDos.IndexOf(dayTodos))-dayToDo" class="col dayToDo" style="width: 14.3%; display: block" >
+                    <div id="@(Model.ToDos.IndexOf(dayTodos))-dayToDo" class="col dayToDo" style="width: 14.3%; display: block;height: 100%">
                         <h3 class="d-none d-xxl-block " draggable="false">@((DayOfWeek) Model.ToDos.IndexOf(dayTodos))</h3>
                         <h3 class="d-none d-xl-block d-xxl-none" draggable="false">@(((DayOfWeek)Model.ToDos.IndexOf(dayTodos)).ToString()[..3])</h3>
                         <h3 class="d-xl-none" draggable="false">@(((DayOfWeek)Model.ToDos.IndexOf(dayTodos)).ToString()[0])</h3>
@@ -36,6 +38,10 @@
                             }
                         </ul>
                     </div>
+                    @if (Model.ToDos[^1] != dayTodos)
+                    {
+                        <div class="vr" style="padding-left: 0; padding-right: 0"></div>
+                    }
                 }
             </div>
         </div>

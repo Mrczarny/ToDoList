@@ -5,27 +5,40 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using ToDoList.Models;
+using Microsoft.AspNetCore.Identity;
+using ToDoList.DataAccess;
+using System.Security.Claims;
+using ToDoList.Controllers;
 
 namespace ToDoList.Pages
 {
     [SaveTempData]
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
-        private readonly HttpClient _httpClient;
+        private readonly ToDoService _toDoService;
+        //private readonly HttpClient _httpClient;
+        //private readonly UserManager<ToDoListUser> _userManager;
 
 
-        public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory client)
+        public IndexModel(ILogger<IndexModel> logger, ToDoService toDoService, UserManager<ToDoListUser> UserManager)
         {
             _logger = logger;
-            _httpClient = client.CreateClient("baseHttp");
+            _toDoService = toDoService;
+            //_httpClient = client.CreateClient("baseHttp");
+            //_userManager = UserManager;
+            //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(User.)
         }
 
         [TempData]
@@ -56,8 +69,13 @@ namespace ToDoList.Pages
             {
                 if (date != null) SelectedWeek = (DateTime) date;
                 if (SelectedWeek == default) SelectedWeek = DateTime.Now - TimeSpan.FromDays((int)DateTime.Now.DayOfWeek);
-                var response =
-                    await _httpClient.GetFromJsonAsync<IEnumerable<ToDoDto>>($"/api/ToDo/{SelectedWeek.Date:yyyy-MM-dd}");
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var response = _toDoService.GetWeekToDos(SelectedWeek, userId);
+                  // await _httpClient.GetFromJsonAsync<IEnumerable<ToDoDto>>($"/api/ToDo/{userId}/{SelectedWeek.Date:yyyy-MM-dd}");
+
+
                 ToDos = SortToDos(response);
                 ToDosJson = JsonConvert.SerializeObject(ToDos);
                 TempData.Keep();
@@ -66,7 +84,10 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return Page();
+
+                ToDos = new List<List<ToDoDto>>();
+                //return Page();
+                return RedirectToPage("/Error");
             }
 
         }
@@ -82,7 +103,7 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
         }
 
@@ -96,7 +117,7 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
         }
 
@@ -115,7 +136,8 @@ namespace ToDoList.Pages
                     var newDate = SelectedWeek.AddDays((int) SelectedDay);
                     SelectedToDo.Date = new DateTime(newDate.Year, newDate.Month, newDate.Day , SelectedToDo.Date.Hour,
                         SelectedToDo.Date.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
-                    await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
+                    _toDoService.EditToDo(SelectedToDo);
+                    //await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
                 }
                 return RedirectToPage(SelectedWeek);
 
@@ -123,7 +145,7 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
         }
 
@@ -146,7 +168,8 @@ namespace ToDoList.Pages
                     oldToDo.Date = oldToDo.Date.Subtract(new TimeSpan(oldToDo.Date.Hour, oldToDo.Date.Minute, 0));
                     oldToDo.Date = oldToDo.Date.Add(new TimeSpan(SelectedToDo.Date.Hour, SelectedToDo.Date.Minute, 0));
                     SelectedToDo.Date = oldToDo.Date;
-                    await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
+                    //await _httpClient.PostAsJsonAsync<ToDoDto>("/api/ToDo/Edit", SelectedToDo);
+                    _toDoService.EditToDo(SelectedToDo);
                 }
                 return RedirectToPage(SelectedWeek);
 
@@ -154,7 +177,7 @@ namespace ToDoList.Pages
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
         }
 
@@ -164,14 +187,15 @@ namespace ToDoList.Pages
             {
                 if (SelectedToDo != default)
                 {
-                    await _httpClient.DeleteAsync($"/api/ToDo/{SelectedToDo.ToDoGuid}");
+                    _toDoService.DeleteToDo(SelectedToDo.ToDoGuid);
+                    //await _httpClient.DeleteAsync($"/api/ToDo/{SelectedToDo.ToDoGuid}");
                 }
                 return RedirectToPage(SelectedWeek);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
         }
 
@@ -207,18 +231,20 @@ namespace ToDoList.Pages
                 SelectedToDo.Date = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, SelectedToDo.Date.Hour,
                     SelectedToDo.Date.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
 
-                await _httpClient.PostAsJsonAsync($"/api/ToDo/", SelectedToDo);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                //await _httpClient.PostAsJsonAsync($"/api/ToDo/{userId}", SelectedToDo);
+                _toDoService.AddToDo(SelectedToDo, userId);
                 return RedirectToPage(SelectedWeek);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
 
         }
 
-        public List<List<ToDoDto>> SortToDos(IEnumerable<ToDoDto> toDos)
+        private List<List<ToDoDto>> SortToDos(IEnumerable<ToDoDto> toDos)
         {
             var result = new List<List<ToDoDto>>();
             foreach (DayOfWeek weekDay in (DayOfWeek[])Enum.GetValues(typeof(DayOfWeek)))

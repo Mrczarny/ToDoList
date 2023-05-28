@@ -9,15 +9,19 @@ namespace ToDoList.Models
         {
             
         }
-        public ToDoModel(ToDoDto m)
+        public ToDoModel(ToDoDto m, string userId)
         {
             Name = m.Name;
             Description = m.Description;
-            if (m.Date != null) Date = (DateTime) m.Date;
+            if (m.Date != default) Date = (DateTime) m.Date;
+            UserId = userId;
         }
 
         [Required]
         public long Id { get; set; }
+
+        [Required]
+        public string UserId { get; set; }
 
         [Required]
         [StringLength(100)]

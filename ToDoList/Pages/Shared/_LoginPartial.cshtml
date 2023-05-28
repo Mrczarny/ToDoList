@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using ToDoList.DataAccess
+
+@inject SignInManager<ToDoListUser> SignInManager
+@inject UserManager<ToDoListUser> UserManager
+
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item">
+            <a class="nav-link text-dark">Hello @(UserManager.GetUserName(User))!</a>
+    </li>
+    <li class="nav-item">
+        <form id="logoutForm" class="form-inline" asp-page="/Logout" asp-route-returnUrl="@Url.Page("/Index", new {area = ""})">
+            <button id="logout" type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <form id="external-account" asp-page="./GoogleLogin" asp-route-returnUrl="/" method="post" class="form-horizontal">
+                <button type="submit" id="login" class="nav-link btn btn-link " name="provider" value="Google" title="Log in using your google account">Login</button>
+        </form>
+        @*<a class="nav-link text-dark" id="login"  asp-page="/GoogleLogin">Login</a>*@
+    </li>
+}
+</ul>

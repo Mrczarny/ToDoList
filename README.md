@@ -67,9 +67,6 @@ You can edit and view ToDo by clicking it once. You can also change the day of t
 
 ToDoList uses .NET core 3.1.
 
-Also make sure that app launch on port 5001 of localhost,
-otherwise change the "baseHttp" httpClient in startup config to web host address of your desire.
-
 <!-- ROADMAP -->
 ## Roadmap
 
